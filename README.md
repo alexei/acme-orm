@@ -1,4 +1,6 @@
-acme-orm
+Acme ORM
 ========
 
 PHP ORM
+
+Currently works with CodeIgniter only
