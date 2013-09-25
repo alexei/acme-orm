@@ -320,6 +320,43 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		return $this;
 	}
 
+	public function create_sql($collection)
+	{
+		$model_field_set = array_keys(SQLModel::$meta[$this->model]['fields']);
+		if (SQLModel::$meta[$this->model]['fields'][SQLModel::$meta[$this->model]['primary_key']]['type'] == 'serial') {
+			unset($model_field_set[array_search(SQLModel::$meta[$this->model]['primary_key'], $model_field_set)]);
+		}
+		$sql = array();
+		$sql[] = 'INSERT';
+		$sql[] = 'INTO';
+		$sql[] = SQLModel::$meta[$this->model]['table_name'];
+		$sql[] = "(`". implode("`, `", $model_field_set) ."`)";
+		$sql[] = 'VALUES';
+		$values_sql = array();
+		foreach ($collection as $entry) {
+			$entry->emit_field_signal('pre_save');
+			foreach ($model_field_set as $model_field) {
+				$save_data[$model_field] = $entry->{$model_field};
+			}
+			$entry->emit_field_signal('post_save');
+			$values_sql[] = "('". implode("', '", array_map(array($this, 'escape'), array_values($save_data))) ."')";
+		}
+		$sql[] = implode(', ', $values_sql);
+		return implode(' ', $sql);
+	}
+
+	public function create($collection)
+	{
+		$query = $this->CI->db->query($this->create_sql($collection));
+		$insert_id = $this->CI->db->insert_id();
+		foreach ($collection as $entry) {
+			$entry->pk = $insert_id;
+			$entry->is_bound = true;
+			$insert_id = $insert_id + 1;
+		}
+		return $this->CI->db->affected_rows();
+	}
+
 	public function update()
 	{}
 
