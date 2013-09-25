@@ -225,7 +225,7 @@ abstract class SQLModel extends Mutator
 	/**
 	 * misc
 	 */
-	protected function emit_field_signal($signal)
+	public function emit_field_signal($signal)
 	{
 		foreach (SQLModel::$meta[$this->__class__]['fields'] as $field_name => $field_meta) {
 			field_emit_signal($signal, $this, $field_name, $field_meta);
