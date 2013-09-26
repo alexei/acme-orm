@@ -240,17 +240,14 @@ function field_uuid_pre_save($model, $field, $meta) {
  */
 function field_slug_pre_save($model, $field, $meta) {
 	if (isset($meta['auto'])) {
-		if ($meta['auto'] === SQLModel::AUTO_ON_CREATE && $model->is_bound === FALSE) {
-			$model->{$field} = substr(URLify::filter($model->{$meta['field']}), 0, $meta['max_length']);
-			if (array_key_exists('preserve_case', $meta) && $meta['preserve_case'] == FALSE) {
-				$model->{$field} = strtolower($model->{$field});
-			}
+		$slug = $model->{$meta['field']};
+		$slug = urlify($slug);
+		$slug = mb_substr($slug, 0, $meta['max_length']);
+		if (array_key_exists('preserve_case', $meta) && $meta['preserve_case'] == false) {
+			$slug = strtolower($slug);
 		}
-		else if ($meta['auto'] === SQLModel::AUTO_ON_UPDATE) {
-			$model->{$field} = substr(URLify::filter($model->{$meta['field']}), 0, $meta['max_length']);
-			if (array_key_exists('preserve_case', $meta) && $meta['preserve_case'] == FALSE) {
-				$model->{$field} = strtolower($model->{$field});
-			}
+		if (($meta['auto'] === SQLModel::AUTO_ON_CREATE && $model->is_bound === false) || ($meta['auto'] === SQLModel::AUTO_ON_UPDATE)) {
+			$model->{$field} = $slug;
 		}
 	}
 }
