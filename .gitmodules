@@ -1,3 +1,0 @@
-[submodule "vendor/urlify"]
-	path = vendor/urlify
-	url = https://github.com/jbroadway/urlify
