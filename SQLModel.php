@@ -92,12 +92,12 @@ abstract class SQLModel extends Mutator
 			foreach (SQLModel::$meta[$this->__class__]['relations'] as $key => $relation) {
 				if ($relation['type'] == 'one_to_many') {
 					if ($relation['implicit'] == TRUE) { // implicit - i.e. auto
-						$this->__defineGetter__($key, array($this, 'generic_get_related_set'));
-						$this->__defineSetter__($key, array($this, 'generic_set_related_set'));
+						$this->__defineGetter__($key, array($this, 'relation_one_to_many_get_many'));
+						$this->__defineSetter__($key, array($this, 'relation_one_to_many_set_many'));
 					}
 					else { // explicit
-						$this->__defineGetter__($key, array($this, 'generic_get_related'));
-						$this->__defineSetter__($key, array($this, 'generic_set_related'));
+						$this->__defineGetter__($key, array($this, 'relation_one_to_many_get_one'));
+						$this->__defineSetter__($key, array($this, 'relation_one_to_many_set_one'));
 					}
 				}
 			}
@@ -173,7 +173,7 @@ abstract class SQLModel extends Mutator
 	/*
 	 * one to many
 	 */
-	public function generic_get_related($key)
+	public function relation_one_to_many_get_one($key)
 	{
 		if (!array_key_exists($key, $this->__attrs_cache__)) {
 			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
@@ -189,7 +189,7 @@ abstract class SQLModel extends Mutator
 		return $this->__attrs_cache__[$key];
 	}
 
-	public function generic_set_related($key, $val)
+	public function relation_one_to_many_set_one($key, $val)
 	{
 		$pk = NULL;
 		$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
@@ -210,7 +210,7 @@ abstract class SQLModel extends Mutator
 	/**
 	 * one to many - reverse
 	 */
-	public function generic_get_related_set($key)
+	public function relation_one_to_many_get_many($key)
 	{
 		if (!array_key_exists($key, $this->__attrs_cache__)) {
 			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
@@ -221,7 +221,7 @@ abstract class SQLModel extends Mutator
 		return $this->__attrs_cache__[$key];
 	}
 
-	public function generic_set_related_set($key, $val)
+	public function relation_one_to_many_set_many($key, $val)
 	{
 		//throw new Exception('Modifying an immutable object is futile');
 		$this->__attrs_cache__[$key] = $val;
