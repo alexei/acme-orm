@@ -94,10 +94,12 @@ abstract class SQLModel extends Mutator
 					if ($relation['implicit'] == TRUE) { // implicit - i.e. auto
 						$this->__defineGetter__($key, array($this, 'relation_one_to_many_get_many'));
 						$this->__defineSetter__($key, array($this, 'relation_one_to_many_set_many'));
+						$this->__defineIsSetter__($key, array($this, 'relation_one_to_many_isset_many'));
 					}
 					else { // explicit
 						$this->__defineGetter__($key, array($this, 'relation_one_to_many_get_one'));
 						$this->__defineSetter__($key, array($this, 'relation_one_to_many_set_one'));
+						$this->__defineIsSetter__($key, array($this, 'relation_one_to_many_isset_one'));
 					}
 				}
 			}
@@ -207,6 +209,13 @@ abstract class SQLModel extends Mutator
 			trigger_error('Bad method call', E_USER_ERROR);
 		}
 	}
+
+	public function relation_one_to_many_isset_one($key)
+	{
+		$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
+		return $this->{$this_meta['relation_field']};
+	}
+
 	/**
 	 * one to many - reverse
 	 */
@@ -225,6 +234,12 @@ abstract class SQLModel extends Mutator
 	{
 		//throw new Exception('Modifying an immutable object is futile');
 		$this->__attrs_cache__[$key] = $val;
+	}
+
+	public function relation_one_to_many_isset_many($key)
+	{
+		$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
+		return $this->{$this_meta['relation_field']};
 	}
 
 	/**
