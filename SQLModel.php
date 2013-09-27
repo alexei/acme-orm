@@ -162,6 +162,11 @@ abstract class SQLModel extends Mutator
 		return $this->{SQLModel::$meta[$this->__class__]['primary_key']} = $val;
 	}
 
+	public function __isset_pk__()
+	{
+		return isset($this->{SQLModel::$meta[$this->__class__]['primary_key']});
+	}
+
 	/**
 	 * Relations
 	 */
