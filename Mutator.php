@@ -102,7 +102,7 @@ class Mutator
 	public function __isset($key)
 	{
 		if (($issetter = $this->__lookupIsSetter__($key)) !== NULL) {
-			return call_user_func($issetter, $key, $val);
+			return call_user_func($issetter, $key);
 		}
 		else if (is_callable(array($this, $fn = '__isset_'. $key .'__'))) {
 			return call_user_func(array($this, $fn));
@@ -135,7 +135,7 @@ class Mutator
 	public function __unset($key)
 	{
 		if (($unsetter = $this->__lookupUnSetter__($key)) !== NULL) {
-			return call_user_func($unsetter, $key, $val);
+			return call_user_func($unsetter, $key);
 		}
 		else if (is_callable(array($this, $fn = '__unset_'. $key .'__'))) {
 			return call_user_func(array($this, $fn));
