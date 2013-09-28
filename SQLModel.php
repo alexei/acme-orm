@@ -212,8 +212,7 @@ abstract class SQLModel extends Mutator
 
 	public function relation_one_to_many_isset_one($key)
 	{
-		$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
-		return $this->{$this_meta['relation_field']};
+		return true;
 	}
 
 	/**
@@ -238,8 +237,7 @@ abstract class SQLModel extends Mutator
 
 	public function relation_one_to_many_isset_many($key)
 	{
-		$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
-		return $this->{$this_meta['relation_field']};
+		return true;
 	}
 
 	/**
