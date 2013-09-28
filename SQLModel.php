@@ -102,6 +102,11 @@ abstract class SQLModel extends Mutator
 						$this->__defineIsSetter__($key, array($this, 'relation_one_to_many_isset_one'));
 					}
 				}
+				else if ($relation['type'] == 'many_to_many') {
+					$this->__defineGetter__($key, array($this, 'relation_many_to_many_get_many'));
+					$this->__defineSetter__($key, array($this, 'relation_many_to_many_set_many'));
+					$this->__defineIsSetter__($key, array($this, 'relation_many_to_many_isset_many'));
+				}
 			}
 			//exit;
 		}
@@ -236,6 +241,30 @@ abstract class SQLModel extends Mutator
 	}
 
 	public function relation_one_to_many_isset_many($key)
+	{
+		return true;
+	}
+
+	/**
+	 * many to many
+	 */
+	public function relation_one_to_many_get_many($key)
+	{
+		if (!array_key_exists($key, $this->__attrs_cache__)) {
+			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
+			$that_meta = SQLModel::$meta[$this_meta['model']]['relations'][$this_meta['other_field']];
+			$objects = acme_class_get($this_meta['model'], 'objects');
+			$this->__attrs_cache__[$key] = $objects->filter(array($this_meta['other_field'] .'.'. $that_meta['relation_field'] => $this->pk));
+		}
+		return $this->__attrs_cache__[$key];
+	}
+
+	public function relation_many_to_many_set_many($key, $val)
+	{
+		$this->__attrs_cache__[$key] = $val;
+	}
+
+	public function relation_many_to_many_isset_many($key)
 	{
 		return true;
 	}
