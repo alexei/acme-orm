@@ -10,6 +10,8 @@ class Mutator
 	protected $__declared_attrs__ = array();
 	protected $__defined_getters__ = array();
 	protected $__defined_setters__ = array();
+	protected $__defined_issetters__ = array();
+	protected $__defined_unsetters__ = array();
 
 	public function __lookupGetter__($key)
 	{
@@ -77,9 +79,32 @@ class Mutator
 		}
 	}
 
+	public function __lookupIsSetter__($key)
+	{
+		if (array_key_exists($key, $this->__defined_issetters__)) {
+			return $this->__defined_issetters__[$key];
+		}
+		else {
+			return NULL;
+		}
+	}
+
+	public function __defineIsSetter__($key, $issetter) {
+		if (isset($this->{$key})) {
+			$this->__attrs_cache__[$key] = $this->__declared_attrs__[$key] = $this->{$key};
+			unset($this->{$key});
+		}
+		else {
+			$this->__defined_issetters__[$key] = $issetter;
+		}
+	}
+
 	public function __isset($key)
 	{
-		if (is_callable(array($this, $fn = '__isset_'. $key .'__'))) {
+		if (($issetter = $this->__lookupIsSetter__($key)) !== NULL) {
+			return call_user_func($issetter, $key);
+		}
+		else if (is_callable(array($this, $fn = '__isset_'. $key .'__'))) {
 			return call_user_func(array($this, $fn));
 		}
 		else {
@@ -87,9 +112,32 @@ class Mutator
 		}
 	}
 
+	public function __lookupUnSetter__($key)
+	{
+		if (array_key_exists($key, $this->__defined_unsetters__)) {
+			return $this->__defined_unsetters__[$key];
+		}
+		else {
+			return NULL;
+		}
+	}
+
+	public function __defineUnSetter__($key, $unsetter) {
+		if (isset($this->{$key})) {
+			$this->__attrs_cache__[$key] = $this->__declared_attrs__[$key] = $this->{$key};
+			unset($this->{$key});
+		}
+		else {
+			$this->__defined_unsetters__[$key] = $unsetter;
+		}
+	}
+
 	public function __unset($key)
 	{
-		if (is_callable(array($this, $fn = '__unset_'. $key .'__'))) {
+		if (($unsetter = $this->__lookupUnSetter__($key)) !== NULL) {
+			return call_user_func($unsetter, $key);
+		}
+		else if (is_callable(array($this, $fn = '__unset_'. $key .'__'))) {
 			return call_user_func(array($this, $fn));
 		}
 		else {

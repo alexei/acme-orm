@@ -19,6 +19,8 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 	private $order_by = array();
 	private $limit = array('row_count' => 0, 'offset' => 0);
 
+	private $joins = array();
+
 	public function __construct($model)
 	{
 		$this->CI =& get_instance();
@@ -68,7 +70,8 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 
 	private function prepare_select_expr($select_expr = array())
 	{
-		if ($select_expr == array('*')) {
+		if ($select_expr == array() || $select_expr == array('*')) {
+			$select_expr = array(SQLModel::$meta[$this->model]['table_name'] .'.*');
 			return $select_expr;
 		}
 		else {
@@ -138,6 +141,42 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 
 	protected function field_lookup($field_lookup, $value)
 	{
+		$field_parts = explode('.', $field_lookup);
+		if (count($field_parts) > 1) {
+			$field_lookup = array_pop($field_parts);
+			$join_left_model = $this->model;
+			foreach ($field_parts as $field_part) {
+				$join_right_model = SQLModel::$meta[$join_left_model]['relations'][$field_part]['model'];
+				if (SQLModel::$meta[$join_left_model]['relations'][$field_part]['type'] == 'one_to_many') {
+					if (SQLModel::$meta[$join_left_model]['relations'][$field_part]['implicit']) {
+						$join = new StdClass();
+						$join->table = SQLModel::$meta[$join_right_model]['table_name'];
+						$join->on = array(
+							SQLModel::$meta[$join_left_model]['table_name'] .'.'. SQLModel::$meta[$join_left_model]['primary_key'],
+							SQLModel::$meta[$join_right_model]['table_name'] .'.'. SQLModel::$meta[$join_right_model]['relations'][SQLModel::$meta[$join_left_model]['relations'][$field_part]['other_field']]['relation_field']
+						);
+						$join->type = '';
+						$this->joins[] = $join;
+					}
+					else {
+						$join = new StdClass();
+						$join->table = SQLModel::$meta[$join_right_model]['table_name'];
+						$join->on = array(
+							SQLModel::$meta[$join_left_model]['table_name'] .'.'. SQLModel::$meta[$join_left_model]['relations'][$field_part]['relation_field'],
+							SQLModel::$meta[$join_right_model]['table_name'] .'.'. SQLModel::$meta[$join_right_model]['primary_key']
+						);
+						$join->type = '';
+						$this->joins[] = $join;
+					}
+				}
+				$join_left_model = $join_right_model;
+			}
+			$field_lookup = SQLModel::$meta[$join_right_model]['table_name'] .'.'. $field_lookup;
+		}
+		else {
+			$field_lookup = SQLModel::$meta[$this->model]['table_name'] .'.'. $field_lookup;
+		}
+
 		/**
 		 * There are basically three optional things you can do with the field:
 		 * - pass it to a function
@@ -285,6 +324,16 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		$sql[] = implode(', ', $this->prepare_select_expr($this->select_expr));
 		$sql[] = 'FROM';
 		$sql[] = SQLModel::$meta[$this->model]['table_name'];
+		if (count($this->joins)) {
+			foreach ($this->joins as $join) {
+				$sql[] = 'JOIN';
+				$sql[] = $join->table;
+				$sql[] = 'ON';
+				$sql[] = $join->on[0];
+				$sql[] = '=';
+				$sql[] = $join->on[1];
+			}
+		}
 		if (count($this->where_cond)) {
 			$sql[] = 'WHERE '. implode(' AND ', $this->where_cond);
 		}
