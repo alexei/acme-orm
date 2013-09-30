@@ -248,7 +248,7 @@ abstract class SQLModel extends Mutator
 	/**
 	 * many to many
 	 */
-	public function relation_one_to_many_get_many($key)
+	public function relation_many_to_many_get_many($key)
 	{
 		if (!array_key_exists($key, $this->__attrs_cache__)) {
 			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
