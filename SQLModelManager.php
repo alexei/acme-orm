@@ -524,6 +524,23 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 	}
 
 	/**
+	 * map / reduce
+	 */
+	public function map($callback)
+	{
+		if ($this->is_executed === false) {
+			$this->select();
+		}
+		$result = array();
+		if (count($this->collection)) {
+			foreach ($this->collection as $index => $document) {
+				$result[] = call_user_func($callback, $document, $index, $this->collection);
+			}
+		}
+		return $result;
+	}
+
+	/**
 	 * ArrayAccess
 	 */
 	public function offsetExists($offset)
