@@ -228,7 +228,7 @@ abstract class SQLModel extends Mutator
 		if (!array_key_exists($key, $this->__attrs_cache__)) {
 			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
 			$that_meta = SQLModel::$meta[$this_meta['model']]['relations'][$this_meta['other_field']];
-			$objects = acme_class_get($this_meta['model'], 'objects');
+			$objects = $this_meta['model']::$objects;
 			$this->__attrs_cache__[$key] = $objects->filter(array($that_meta['relation_field'] => $this->pk));
 		}
 		return $this->__attrs_cache__[$key];
@@ -253,7 +253,7 @@ abstract class SQLModel extends Mutator
 		if (!array_key_exists($key, $this->__attrs_cache__)) {
 			$this_meta = SQLModel::$meta[$this->__class__]['relations'][$key];
 			$that_meta = SQLModel::$meta[$this_meta['model']]['relations'][$this_meta['other_field']];
-			$objects = acme_class_get($this_meta['model'], 'objects');
+			$objects = $this_meta['model']::$objects;
 			$this->__attrs_cache__[$key] = $objects->filter(array($this_meta['other_field'] .'.'. $that_meta['relation_field'] => $this->pk));
 		}
 		return $this->__attrs_cache__[$key];
