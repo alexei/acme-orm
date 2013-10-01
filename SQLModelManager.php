@@ -540,6 +540,28 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		return $result;
 	}
 
+	public function reduce($callback, $initial = null)
+	{
+		if ($this->is_executed === false) {
+			$this->select();
+		}
+		$is_value_set = false;
+		if (count($this->collection)) {
+			if (func_num_args() > 1) {
+				$previous_value = $initial;
+				$is_value_set = true;
+			}
+			foreach ($this->collection as $index => $current_value) {
+				$previous_value = call_user_func($callback, $previous_value, $current_value, $index, $this->collection);
+				$is_value_set = true;
+			}
+		}
+		if (!$is_value_set) {
+			throw new Exception('Reduce of empty array with no initial value');
+		}
+		return $previous_value;
+	}
+
 	/**
 	 * ArrayAccess
 	 */
