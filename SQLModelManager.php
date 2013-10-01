@@ -126,20 +126,31 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 	public function order()
 	{
 		$that = clone $this;
+
 		if (func_num_args()) {
 			foreach (func_get_args() as $col) {
 				if ($col === '?') {
 					$that->order_by[] = 'RAND()';
 				}
 				else {
-					$that->order_by[] = ltrim($col, '+-') .' '. ($col{0} == '-' ? 'DESC' : 'ASC');
+					$order = '+';
+					if (in_array($col{0}, array('+', '-'))) {
+						$order = $col{0};
+						$field_lookup = substr($col, 1);
+					}
+					else {
+						$field_lookup = $col;
+					}
+					$field = $that->field_name($field_lookup);
+					$that->order_by[] = $field .' '. ($order == '-' ? 'DESC' : 'ASC');
 				}
 			}
 		}
+
 		return $that;
 	}
 
-	protected function field_lookup($field_lookup, $value)
+	protected function field_name($field_lookup)
 	{
 		$field_parts = explode('.', $field_lookup);
 		if (count($field_parts) > 1) {
@@ -176,6 +187,13 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		else {
 			$field_lookup = SQLModel::$meta[$this->model]['table_name'] .'.'. $field_lookup;
 		}
+
+		return $field_lookup;
+	}
+
+	protected function field_lookup($field_lookup, $value)
+	{
+		$field_lookup = $this->field_name($field_lookup);
 
 		/**
 		 * There are basically three optional things you can do with the field:
