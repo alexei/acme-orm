@@ -30,7 +30,7 @@ class SQLModelMeta implements ArrayAccess
 	public function reflect($model)
 	{
 		if (!isset($this->model_list[$model])) {
-			$uncamelized_model_name = acme_uncamelize($model, ' ');
+			$uncamelized_model_name = _uncamelize($model, ' ');
 
 			$class_info = new ReflectionClass($model);
 			$super_model = is_subclass_of($super_class = get_parent_class($model), 'SQLModel') ? $super_class : NULL;
@@ -117,7 +117,6 @@ class SQLModelMeta implements ArrayAccess
 				if ($meta['type'] === 'one_to_one') {
 				}
 				else if ($meta['type'] === 'one_to_many') {
-					// echo acme_dump(SQLModel::$meta[$meta['model']]['primary_key'] .'_'. $name);
 					$_name = isset($meta['db_field']) ? $meta['db_field'] : SQLModel::$meta[$meta['model']]['primary_key'] .'_'. $name;
 					$this->model_list[$model]['fields'][$_name] = array('type' => 'uint', 'index' => TRUE);
 					unset($this->model_list[$model]['fields'][$name]);
@@ -248,7 +247,7 @@ class SQLModelMeta implements ArrayAccess
 			}
 		}
 
-		$class_list = array_diff_key(array_flip(acme_get_subclasses('SQLModel')), $this->model_list);
+		$class_list = array_diff_key(array_flip(_get_subclasses('SQLModel')), $this->model_list);
 		while (count($class_list)) {
 			$class = key($class_list);
 			$this->reflect($class);
