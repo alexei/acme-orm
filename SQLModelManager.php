@@ -80,7 +80,7 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 				if (is_numeric($field)) {
 					$field = $alias;
 				}
-				$__select_expr[] = $field .' AS '. $alias;
+				$__select_expr[] = ($field == $alias ? $field : ($field .' AS '. $alias));
 			}
 		}
 		return $__select_expr;
