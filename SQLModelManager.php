@@ -167,7 +167,9 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 							SQLModel::$meta[$join_right_model]['table_name'] .'.'. SQLModel::$meta[$join_right_model]['relations'][SQLModel::$meta[$join_left_model]['relations'][$field_part]['other_field']]['relation_field']
 						);
 						$join->type = '';
-						$this->joins[] = $join;
+						if (!in_array($join, $this->joins)) {
+							$this->joins[] = $join;
+						}
 					}
 					else {
 						$join = new StdClass();
@@ -177,7 +179,9 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 							SQLModel::$meta[$join_right_model]['table_name'] .'.'. SQLModel::$meta[$join_right_model]['primary_key']
 						);
 						$join->type = '';
-						$this->joins[] = $join;
+						if (!in_array($join, $this->joins)) {
+							$this->joins[] = $join;
+						}
 					}
 				}
 				$join_left_model = $join_right_model;
