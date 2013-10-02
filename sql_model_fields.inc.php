@@ -211,10 +211,10 @@ function field_file_post_delete($model, $field, $meta) {
 function field_ip_pre_save($model, $field, $meta) {
 	if (isset($meta['auto'])) {
 		if ($meta['auto'] === SQLModel::AUTO_ON_CREATE && $model->is_bound === FALSE) {
-			$model->{$field} = acme_ip_address();
+			$model->{$field} = _ip_address();
 		}
 		else if ($meta['auto'] === SQLModel::AUTO_ON_UPDATE) {
-			$model->{$field} = acme_ip_address();
+			$model->{$field} = _ip_address();
 		}
 	}
 }
@@ -261,10 +261,10 @@ function field_slug_pre_save($model, $field, $meta) {
 function field_teaser_pre_save($model, $field, $meta) {
 	if (isset($meta['auto'])) {
 		if ($meta['auto'] === SQLModel::AUTO_ON_CREATE && $model->is_bound === FALSE) {
-			$model->{$field} = acme_close_tags(acme_teaser($model->{$meta['field']}, $meta['max_length']));
+			$model->{$field} = _close_tags(_teaser($model->{$meta['field']}, $meta['max_length']));
 		}
 		else if ($meta['auto'] === SQLModel::AUTO_ON_UPDATE) {
-			$model->{$field} = acme_close_tags(acme_teaser($model->{$meta['field']}, $meta['max_length']));
+			$model->{$field} = _close_tags(_teaser($model->{$meta['field']}, $meta['max_length']));
 		}
 	}
 }
