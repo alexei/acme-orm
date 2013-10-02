@@ -80,7 +80,7 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 				if (is_numeric($field)) {
 					$field = $alias;
 				}
-				$__select_expr[] = $field .' AS '. $alias;
+				$__select_expr[] = ($field == $alias ? $field : ($field .' AS '. $alias));
 			}
 		}
 		return $__select_expr;
@@ -376,13 +376,28 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		if ($query) {
 			$this->is_executed = TRUE;
 			if ($query->num_rows()) {
+				$model_name = $this->model;
+				$model_fields = array_keys(SQLModel::$meta[$model_name]['fields']);
+				$model_fields_prefixed = array_map(
+		            function($field) use ($model_name) {
+		                return SQLModel::$meta[$model_name]['table_name'] .'.'. $field;
+		            },
+		            $model_fields
+		        );
 				foreach ($query->result() as $row) {
 					if ($this->select_expr == array('*')) {
 						$object = new $this->model($row);
 						$object->is_bound = TRUE;
 					}
 					else {
-						$object = $row;
+						$selected_fields = array_keys(get_object_vars($row));
+						if ($selected_fields == $model_fields || $selected_fields == $model_fields_prefixed) {
+							$object = new $this->model($row);
+							$object->is_bound = TRUE;
+						}
+						else {
+							$object = $row;
+						}
 					}
 					$this->collection[] = $object;
 				}
