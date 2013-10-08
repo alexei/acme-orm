@@ -487,6 +487,16 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		$sql[] = implode(', ', $this->prepare_select_expr($select_expr));
 		$sql[] = 'FROM';
 		$sql[] = SQLModel::$meta[$this->model]['table_name'];
+        if (count($this->joins)) {
+            foreach ($this->joins as $join) {
+                $sql[] = 'JOIN';
+                $sql[] = $join->table;
+                $sql[] = 'ON';
+                $sql[] = $join->on[0];
+                $sql[] = '=';
+                $sql[] = $join->on[1];
+            }
+        }
 		if (count($this->where_cond)) {
 			$sql[] = 'WHERE '. implode(' AND ', $this->where_cond);
 		}
@@ -515,13 +525,13 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		}
 		$argv = func_get_args();
 		$fn_list = array(
-			'avg' => 'AVG(`%s`) AS `%s`',
-			'count_distinct' => 'COUNT(DISTINCT `%s`)',
-			'count' => 'COUNT(`%s`)',
-			'max' => 'MAX(`%s`)',
-			'min' => 'MIN(`%s`)',
-			'sum' => 'SUM(`%s`)'
-		);
+            'avg' => 'AVG(%s) AS %s',
+            'count_distinct' => 'COUNT(DISTINCT %s)',
+            'count' => 'COUNT(%s)',
+            'max' => 'MAX(%s)',
+            'min' => 'MIN(%s)',
+            'sum' => 'SUM(%s)'
+        );
 		if ($this->select_expr == array('*')) {
 			$select_expr = array();
 		}
@@ -529,11 +539,14 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 			$select_expr = $this->select_expr;
 		}
 		foreach ($argv as $field_lookup) {
+            $field_lookup = $this->field_name($field_lookup);
 			$lookup_type = explode('__', $field_lookup);
 			$field = array_shift($lookup_type);
+            $field = implode('.', array_map(function($field) { return '`'. $field .'`'; }, explode('.', $field)));
+            $alias = array_pop(explode('.', $field_lookup));
 			if ($fn = current($lookup_type)) {
 				if (isset($fn_list[$fn])) {
-					$select_expr[$field_lookup] = sprintf($fn_list[$fn], $field);
+					$select_expr[$alias] = sprintf($fn_list[$fn], $field);
 				}
 				else {
 					trigger_error('Invalid aggregate function', E_USER_ERROR);
