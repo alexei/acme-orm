@@ -17,6 +17,7 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 	private $select_expr = array('*');
 	private $where_cond = array();
 	private $order_by = array();
+	private $group_by = array();
 	private $limit = array('row_count' => 0, 'offset' => 0);
 
 	private $joins = array();
@@ -144,6 +145,20 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 					$field = $that->field_name($field_lookup);
 					$that->order_by[] = $field .' '. ($order == '-' ? 'DESC' : 'ASC');
 				}
+			}
+		}
+
+		return $that;
+	}
+
+	public function group()
+	{
+		$that = clone $this;
+
+		if (func_num_args()) {
+			foreach (func_get_args() as $field_lookup) {
+				$field = $that->field_name($field_lookup);
+				$that->group_by[] = $field;
 			}
 		}
 
@@ -358,6 +373,9 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 		}
 		if (count($this->where_cond)) {
 			$sql[] = 'WHERE '. implode(' AND ', $this->where_cond);
+		}
+		if (count($this->group_by)) {
+			$sql[] = 'GROUP BY '. implode(', ', $this->group_by);
 		}
 		if (count($this->order_by)) {
 			$sql[] = 'ORDER BY '. implode(', ', $this->order_by);
