@@ -200,8 +200,15 @@ function field_file_pre_init($model, $field, $meta) {
 	$model->{$field} = isset($meta['default']) ? $meta['default'] : '';
 }
 function field_file_post_delete($model, $field, $meta) {
+	$base_path = isset($meta['base_path']) ? $meta['base_path'] : '';
 	$file_path = $model->{$field};
-	return file_exists($file_path) && is_writable(dirname($file_path)) && unlink($file_path);
+	if ($file_path) {
+		$file_path = $base_path .'/'. $file_path;
+		return file_exists($file_path) && is_writable(dirname($file_path)) && unlink($file_path);
+	}
+	else {
+		return true;
+	}
 }
 
 
