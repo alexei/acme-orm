@@ -485,7 +485,19 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 
 	public function delete()
 	{
+		if ($this->is_executed === FALSE) {
+			$this->select();
+		}
+		foreach ($this->collection as $document) {
+			$document->emit_field_signal('pre_delete');
+		}
+
 		$query = $this->CI->db->query($this->delete_sql());
+
+		foreach ($this->collection as $document) {
+			$document->emit_field_signal('post_delete');
+		}
+
 		return $this->CI->db->affected_rows();
 	}
 
