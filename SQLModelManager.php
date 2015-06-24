@@ -573,7 +573,8 @@ class SQLModelManager implements ArrayAccess, Countable, Iterator
 			$lookup_type = explode('__', $field_lookup);
 			$field = array_shift($lookup_type);
             $field = implode('.', array_map(function($field) { return '`'. $field .'`'; }, explode('.', $field)));
-            $alias = array_pop(explode('.', $field_lookup));
+            $field_parts = explode('.', $field_lookup);
+            $alias = array_pop($field_parts);
 			if ($fn = current($lookup_type)) {
 				if (isset($fn_list[$fn])) {
 					$select_expr[$alias] = sprintf($fn_list[$fn], $field);
